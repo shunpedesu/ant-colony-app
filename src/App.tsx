@@ -12,15 +12,29 @@ export default function App() {
 
   return (
     <div style={{ textAlign: 'center' }}>
-      <h1 style={{ fontSize: 28, marginBottom: 4, color: '#2a1400' }}>
-        🐜 アリコロニーシミュレーター
+      <h1 style={{ fontSize: 28, marginBottom: 8, color: '#2a1400' }}>
+        🐜 アリコロニー観察室
       </h1>
-      <p style={{ color: '#5a3a1a', marginBottom: 16, fontSize: 13 }}>
-        Step 5 — UIコントロール（速度・アリ数・リセット）
+      <p style={{ color: '#5a3a1a', marginBottom: 20, fontSize: 14, lineHeight: 1.7, maxWidth: 480, margin: '0 auto 20px' }}>
+        アリの群れの動きを、ただ眺めるための小さなウェブアプリを公開しました。<br />
+        操作はありません。意味のないようで、なぜか見てしまう時間をどうぞ。
       </p>
 
       {/* キャンバス：key が変わると完全リセット */}
       <AntCanvas key={resetKey} antCount={antCount} speed={speed} />
+
+      {/* 制作者クレジット */}
+      <p style={{ marginTop: 20, fontSize: 12, color: '#7a5530' }}>
+        明日なんとかなるかも研究所 /{' '}
+        <a
+          href="https://note.com/shunpedesu"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: '#5a3010', textDecoration: 'underline' }}
+        >
+          しゅんぺ
+        </a>
+      </p>
 
       {/* コントロールパネル */}
       <div style={panelStyle}>
