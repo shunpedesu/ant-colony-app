@@ -11,11 +11,11 @@ export default function App() {
   const [resetKey, setResetKey] = useState(0)
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h1 style={{ fontSize: 28, marginBottom: 8, color: '#2a1400' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <h1 style={{ fontSize: 28, marginBottom: 8, color: '#fff3e0' }}>
         🐜 アリコロニー観察室
       </h1>
-      <p style={{ color: '#5a3a1a', marginBottom: 20, fontSize: 14, lineHeight: 1.7, maxWidth: 480, margin: '0 auto 20px' }}>
+      <p style={{ color: '#f5deb3', marginBottom: 20, fontSize: 14, lineHeight: 1.8, maxWidth: 480, textAlign: 'center' }}>
         アリの群れの動きを、ただ眺めるための小さなウェブアプリを公開しました。<br />
         操作はありません。意味のないようで、なぜか見てしまう時間をどうぞ。
       </p>
@@ -24,13 +24,13 @@ export default function App() {
       <AntCanvas key={resetKey} antCount={antCount} speed={speed} />
 
       {/* 制作者クレジット */}
-      <p style={{ marginTop: 20, fontSize: 12, color: '#7a5530' }}>
+      <p style={{ marginTop: 16, fontSize: 12, color: '#e8d5b8' }}>
         明日なんとかなるかも研究所 /{' '}
         <a
           href="https://note.com/shunpedesu"
           target="_blank"
           rel="noreferrer"
-          style={{ color: '#5a3010', textDecoration: 'underline' }}
+          style={{ color: '#ffe0b2', textDecoration: 'underline' }}
         >
           しゅんぺ
         </a>

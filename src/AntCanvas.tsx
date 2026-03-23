@@ -9,16 +9,16 @@ const FOOD_DETECT_R = 14
 const NEST_DETECT_R = 20
 
 // フェロモン関連
-const CELL_SIZE = 10                              // グリッド1セルのpx
-const GRID_W = Math.ceil(CANVAS_W / CELL_SIZE)   // 70セル
-const GRID_H = Math.ceil(CANVAS_H / CELL_SIZE)   // 50セル
-const EVAPORATION = 0.991                         // 毎フレームの蒸発率（1に近いほど長持ち）
-const DEPOSIT = 0.85                              // 帰巣中アリが1フレームで置く量
+const CELL_SIZE = 10
+const GRID_W = Math.ceil(CANVAS_W / CELL_SIZE)
+const GRID_H = Math.ceil(CANVAS_H / CELL_SIZE)
+const EVAPORATION = 0.991
+const DEPOSIT = 0.85
 
-// センサー関連（フェロモン感知）
-const SENSOR_DIST = 20                            // 前方何pxを感知するか
-const SENSOR_ANGLE = Math.PI / 5                  // センサーの開き角（36°）
-const FOLLOW_PROB = 0.72                          // フェロモンを追う確率（残りはランダム探索）
+// センサー関連
+const SENSOR_DIST = 20
+const SENSOR_ANGLE = Math.PI / 5
+const FOLLOW_PROB = 0.72
 
 // ── 型定義 ──────────────────────────────────────────
 type AntState = 'searching' | 'returning'
@@ -32,7 +32,7 @@ type Ant = {
 
 type Nest = { x: number; y: number; radius: number }
 type Food = { x: number; y: number; radius: number }
-type Grid = number[][] // 各セル 0.0〜1.0 のフェロモン強度
+type Grid = number[][]
 
 // ── 初期化 ───────────────────────────────────────────
 function createAnts(nest: Nest, count: number): Ant[] {
@@ -73,7 +73,6 @@ function evaporateGrid(grid: Grid): void {
   }
 }
 
-// 指定方向・距離のセルのフェロモン値を返す
 function samplePheromone(grid: Grid, x: number, y: number, angle: number): number {
   const col = Math.floor((x + Math.cos(angle) * SENSOR_DIST) / CELL_SIZE)
   const row = Math.floor((y + Math.sin(angle) * SENSOR_DIST) / CELL_SIZE)
@@ -91,27 +90,23 @@ function updateAnt(ant: Ant, nest: Nest, foods: Food[], grid: Grid, speed: numbe
   let state = ant.state
 
   if (state === 'searching') {
-    // 前方3方向のフェロモンをサンプリング
     const pL = samplePheromone(grid, ant.x, ant.y, angle - SENSOR_ANGLE)
     const pC = samplePheromone(grid, ant.x, ant.y, angle)
     const pR = samplePheromone(grid, ant.x, ant.y, angle + SENSOR_ANGLE)
     const totalP = pL + pC + pR
 
     if (totalP > 0.08 && Math.random() < FOLLOW_PROB) {
-      // フェロモンが濃い方向へ曲がる
       if (pC >= pL && pC >= pR) {
-        angle += (Math.random() - 0.5) * WANDER_STRENGTH * 0.4 // ほぼ直進
+        angle += (Math.random() - 0.5) * WANDER_STRENGTH * 0.4
       } else if (pL > pR) {
-        angle -= SENSOR_ANGLE * 0.6                             // 左へ
+        angle -= SENSOR_ANGLE * 0.6
       } else {
-        angle += SENSOR_ANGLE * 0.6                             // 右へ
+        angle += SENSOR_ANGLE * 0.6
       }
     } else {
-      // フェロモンなし or 確率で無視 → ランダム探索
       angle += (Math.random() - 0.5) * WANDER_STRENGTH
     }
 
-    // 餌の感知
     for (const food of foods) {
       if (calcDist(ant.x, ant.y, food.x, food.y) < FOOD_DETECT_R + food.radius) {
         state = 'returning'
@@ -148,8 +143,7 @@ function drawPheromones(ctx: CanvasRenderingContext2D, grid: Grid): void {
   for (let r = 0; r < GRID_H; r++) {
     for (let c = 0; c < GRID_W; c++) {
       const val = grid[r][c]
-      if (val < 0.01) continue // ほぼ0のセルはスキップ（パフォーマンス）
-      // 暗い赤茶色（砂地背景に馴染みつつ視認できる）
+      if (val < 0.01) continue
       ctx.fillStyle = `rgba(90, 40, 0, ${(val * 0.5).toFixed(2)})`
       ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     }
@@ -192,7 +186,6 @@ function drawFood(ctx: CanvasRenderingContext2D, food: Food) {
 }
 
 function drawAnt(ctx: CanvasRenderingContext2D, ant: Ant) {
-  // 探索中：黒  帰巣中：暗い赤（食べ物を運んでいる）
   const bodyColor = ant.state === 'returning' ? '#cc2200' : '#111111'
   const headColor = ant.state === 'returning' ? '#991a00' : '#000000'
   ctx.save()
@@ -221,11 +214,9 @@ export default function AntCanvas({ antCount, speed }: Props) {
   const antsRef = useRef<Ant[]>([])
   const gridRef = useRef<Grid>([])
   const rafRef = useRef<number>(0)
-  // ループを再起動せずに最新値を参照するためのref
   const speedRef = useRef(speed)
   const antCountRef = useRef(antCount)
 
-  // propsが変わったらrefだけ更新（アニメーションループはそのまま継続）
   useEffect(() => {
     speedRef.current = speed
     antCountRef.current = antCount
@@ -245,8 +236,6 @@ export default function AntCanvas({ antCount, speed }: Props) {
 
     function tick() {
       const grid = gridRef.current
-
-      // アリ数をスライダーに合わせて動的調整
       const target = antCountRef.current
       if (antsRef.current.length > target) {
         antsRef.current = antsRef.current.slice(0, target)
@@ -258,23 +247,17 @@ export default function AntCanvas({ antCount, speed }: Props) {
         antsRef.current = [...antsRef.current, ...add]
       }
 
-      // 1. 背景クリア
-      ctx!.fillStyle = '#c8a96e'  // 砂地・土の色（黒アリが映える）
+      ctx!.fillStyle = '#c8a96e'
       ctx!.fillRect(0, 0, CANVAS_W, CANVAS_H)
 
-      // 2. フェロモン蒸発
       evaporateGrid(grid)
 
-      // 3. アリを更新 → 帰巣中ならフェロモンを置く
       antsRef.current = antsRef.current.map((ant) => {
         const next = updateAnt(ant, nest, foods, grid, speedRef.current)
-        if (next.state === 'returning') {
-          depositPheromone(grid, next)
-        }
+        if (next.state === 'returning') depositPheromone(grid, next)
         return next
       })
 
-      // 4. 描画（フェロモン → 餌 → 巣 → アリ の順）
       drawPheromones(ctx!, grid)
       foods.forEach((f) => drawFood(ctx!, f))
       drawNest(ctx!, nest)
@@ -285,14 +268,20 @@ export default function AntCanvas({ antCount, speed }: Props) {
 
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
-  }, []) // 初回マウント時のみ実行
+  }, [])
 
   return (
     <canvas
       ref={canvasRef}
       width={CANVAS_W}
       height={CANVAS_H}
-      style={{ border: '1px solid #333', borderRadius: 8, display: 'block' }}
+      style={{
+        border: '1px solid #333',
+        borderRadius: 8,
+        display: 'block',
+        width: 'min(700px, calc(100vw - 32px))',
+        height: 'auto',
+      }}
     />
   )
 }
